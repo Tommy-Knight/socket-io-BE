@@ -20,23 +20,14 @@ io.on("connection", (socket) => {
 	console.log("id🍕", socket.id);
 
 	console.log("rooms🍒", socket.rooms);
-io.sockets.emit("hello there");
 
-	socket.broadcast.emit("yay");
 	socket.on("login", ({ username, room }) => {
-		onlineUsers.push({ username: username, id: socket.id, room });
-
-		//.emit - echoing back to itself
-		socket.emit("loggedin");
-
-		//.broadcast.emit - emitting to everyone else
-		socket.broadcast.emit("newConnection");
+		onlineUsers.push({ username, id: socket.id, room });
 
 		socket.join(room);
-
 		console.log(socket.rooms);
-
-		//io.sockets.emit - emitting to everybody in the known world
+		socket.broadcast.emit("newLogin");
+		socket.emit("loggedin");
 	});
 
 	socket.on("disconnect", () => {
@@ -44,7 +35,7 @@ io.sockets.emit("hello there");
 		onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
 	});
 
-	socket.on("sendMessage", async ({ message, room }) => {
+	socket.on("sendmessage", async ({ message, room }) => {
 		await RoomModel.findOneAndUpdate(
 			{ name: room },
 			{
